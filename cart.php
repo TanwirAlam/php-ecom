@@ -1,5 +1,6 @@
 <?php
 session_start();
+include "db.php";
 
 if (!isset($_SESSION["cart"])) {
     $_SESSION["cart"] = [];
@@ -7,21 +8,22 @@ if (!isset($_SESSION["cart"])) {
 
 // Add item to cart
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $product = $_POST["product"];
+    $product_id = $_POST["product_id"];
     $quantity = $_POST["quantity"];
 
-    $_SESSION["cart"][] = ["product" => $product, "quantity" => $quantity];
-    echo json_encode(["message" => "Item added to cart", "cart" => $_SESSION["cart"]]);
+    $_SESSION["cart"][] = ["product_id" => $product_id, "quantity" => $quantity];
+    echo "Item added to cart!";
 }
 
-// Get cart items
-if ($_SERVER["REQUEST_METHOD"] == "GET") {
-    echo json_encode($_SESSION["cart"]);
+// View cart
+echo "<h2>Shopping Cart</h2>";
+foreach ($_SESSION["cart"] as $item) {
+    $product_id = $item["product_id"];
+    $result = $conn->query("SELECT * FROM products WHERE id=$product_id");
+    $product = $result->fetch_assoc();
+    echo "<p>{$product['name']} - Quantity: {$item['quantity']} - Price: {$product['price']}</p>";
 }
 
-// Clear cart
-if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
-    $_SESSION["cart"] = [];
-    echo json_encode(["message" => "Cart cleared"]);
-}
+// Checkout button
+echo "<a href='checkout.php'>Proceed to Checkout</a>";
 ?>
